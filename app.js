@@ -163,33 +163,40 @@
     if (!state.pos || state.loading) return;
     state.loading = true;
     $('listInfo').textContent = '搜尋附近餐廳中…';
-    const body = 'data=' + encodeURIComponent(
-      buildOverpassQuery(state.pos.lat, state.pos.lng, state.filters.radius)
-    );
-    const opts = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body,
-    };
-    const stop = new AbortController();
-    try {
-      const data = await Promise.any(
-        OVERPASS_ENDPOINTS.map(u => timedFetch(u, opts, 9000, stop.signal))
+    // 記住可用的資料源:上次走備援且未滿一天 → 直接備援,不浪費時間等 Overpass 逾時
+    const pref = store.get(LS.SOURCE, null);
+    const useOverpass = !(pref && pref.name === 'nominatim' && Date.now() - pref.ts < 864e5);
+    if (useOverpass) {
+      const body = 'data=' + encodeURIComponent(
+        buildOverpassQuery(state.pos.lat, state.pos.lng, state.filters.radius)
       );
-      stop.abort();
-      state.restaurants = normalizeAll(data.elements || []);
-      state.degraded = false;
-      state.loading = false;
-      updateCuisineOptions();
-      renderAll();
-      return;
-    } catch { /* 全滅 → 備援 */ }
+      const opts = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+      };
+      const stop = new AbortController();
+      try {
+        const data = await Promise.any(
+          OVERPASS_ENDPOINTS.map(u => timedFetch(u, opts, 9000, stop.signal))
+        );
+        stop.abort();
+        state.restaurants = normalizeAll(data.elements || []);
+        state.degraded = false;
+        state.loading = false;
+        store.set(LS.SOURCE, { name: 'overpass', ts: Date.now() });
+        updateCuisineOptions();
+        renderAll();
+        return;
+      } catch { /* 全滅 → 備援 */ }
+    }
     try {
       $('listInfo').textContent = '改用備援資料源查詢中…';
       const items = await fetchNominatim();
       state.restaurants = items;
       state.degraded = true;
       state.loading = false;
+      store.set(LS.SOURCE, { name: 'nominatim', ts: Date.now() });
       updateCuisineOptions();
       renderAll();
       if (items.length) toast('Overpass 連線失敗,改用備援資料(資訊可能較不完整)');
@@ -209,8 +216,9 @@
     const viewbox = `${lng - dLng},${lat + dLat},${lng + dLng},${lat - dLat}`;
     const seen = new Set();
     const items = [];
-    for (const q of NOMINATIM_QUERIES) {
-      const url = `${NOMINATIM}?q=${encodeURIComponent(q)}&format=jsonv2` +
+    for (let i = 0; i < NOMINATIM_QUERIES.length; i++) {
+      $('listInfo').textContent = `備援資料源查詢中…(${i + 1}/${NOMINATIM_QUERIES.length})`;
+      const url = `${NOMINATIM}?q=${encodeURIComponent(NOMINATIM_QUERIES[i])}&format=jsonv2` +
         `&bounded=1&viewbox=${viewbox}&limit=50&extratags=1&namedetails=1`;
       const data = await timedFetch(url, {}, 15000);
       for (const p of data) {

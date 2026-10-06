@@ -58,6 +58,7 @@ const LS = {
   BLACKLIST: 'eat-blacklist',
   RECENT: 'eat-recent-picks',
   FILTERS: 'eat-filters',
+  SOURCE: 'eat-data-source',
 };
 
 const store = {

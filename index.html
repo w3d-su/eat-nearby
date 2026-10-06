@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>附近吃什麼</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>附近吃什麼</h1>
+  <button id="locStatus" class="loc-status" title="點擊重新定位">定位中…</button>
+  <button id="filterToggle" class="btn btn-ghost">篩選 ▾</button>
+</header>
+
+<section id="filterPanel" class="filters hidden">
+  <div class="filter-row">
+    <span class="filter-label">距離</span>
+    <div class="seg" id="radiusSeg">
+      <button data-r="500">500m</button>
+      <button data-r="1000">1km</button>
+      <button data-r="2000">2km</button>
+      <button data-r="3000">3km</button>
+    </div>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">類型</span>
+    <div class="checks" id="catChecks"></div>
+  </div>
+  <div class="filter-row">
+    <span class="filter-label">料理</span>
+    <select id="cuisineSel"><option value="all">全部</option></select>
+  </div>
+  <div class="filter-row toggles">
+    <label class="switch"><input type="checkbox" id="openNowChk"> 只看營業中</label>
+    <label class="switch"><input type="checkbox" id="favOnlyChk"> 只看最愛</label>
+  </div>
+</section>
+
+<main>
+  <div id="map"></div>
+  <div id="listInfo" class="list-info"></div>
+  <ul id="restaurantList" class="list"></ul>
+  <details id="blacklistBox" class="blacklist hidden">
+    <summary id="blacklistSummary"></summary>
+    <ul id="blacklistItems"></ul>
+  </details>
+</main>
+
+<button id="spinBtn" class="spin-btn" disabled>幫我決定!</button>
+
+<div id="slotOverlay" class="overlay hidden">
+  <div class="slot-box">
+    <div class="slot-title">今天吃…</div>
+    <div id="slotName" class="slot-name">???</div>
+    <div id="slotResult" class="slot-result hidden"></div>
+    <div class="slot-actions hidden" id="slotActions">
+      <a id="slotGmaps" class="btn" target="_blank" rel="noopener">在 Google 地圖開啟 ↗</a>
+      <button id="slotAgain" class="btn">再抽一次</button>
+      <button id="slotDone" class="btn btn-primary">就這間!</button>
+    </div>
+    <button id="slotClose" class="slot-close" aria-label="關閉">✕</button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/opening_hours@3.14.0/build/opening_hours.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -15,11 +15,12 @@
 ## 2. 檔案結構
 
 ```
-index.html   # 頁面結構、CDN 引入
-style.css    # 全部樣式
-data.js      # 常數:分類/cuisine 中文對照表、Overpass 查詢產生器、storage helpers
-app.js       # 主邏輯:定位、撈資料、篩選、清單/地圖渲染、拉霸、storage
+index.html   # 單一檔案:HTML 結構 + <style> 全部樣式 + 兩個 <script>(常數/工具 + 主邏輯)
+SPEC.md      # 本規格書
 ```
+
+> 原本是 4 檔分離(index/style/data/app),後整理為單一 index.html 方便傳遞部署。
+> 內部仍分兩個 script 區塊:第一塊是對照表/查詢產生器/storage helpers,第二塊是主邏輯 IIFE。
 
 ## 3. 功能需求
 
